@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cryptography Math Project</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --card: #16161f;
+    --border: #2a2a3a;
+    --accent1: #e8c547;
+    --accent2: #47b8e8;
+    --accent3: #e847a0;
+    --text: #e8e8f0;
+    --muted: #7a7a9a;
+    --success: #47e8a0;
+    --error: #e84747;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BG grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(232,197,71,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,197,71,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    height: 60px;
+  }
+
+  .nav-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent1);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex: 1;
+  }
+
+  .nav-tab {
+    padding: 0.4rem 1rem;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: none;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+
+  .nav-tab:hover { color: var(--text); border-color: var(--border); }
+  .nav-tab.active { color: var(--accent1); border-color: var(--accent1); background: rgba(232,197,71,0.08); }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 5rem 2rem 3rem;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent1);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--text) 40%, var(--accent1));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    color: var(--muted);
+    font-size: 1.1rem;
+    font-weight: 300;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  /* SECTIONS */
+  .section {
+    display: none;
+    position: relative;
+    z-index: 1;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem 2rem 4rem;
+    animation: fadeUp 0.4s ease;
+  }
+
+  .section.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    font-weight: 900;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--border);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .section-info h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .section-info p {
+    color: var(--muted);
+    line-height: 1.7;
+    font-size: 0.95rem;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover { border-color: rgba(232,197,71,0.3); }
+
+  .card-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent1);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .card-title::before {
+    content: '';
+    width: 20px;
+    height: 2px;
+    background: var(--accent1);
+  }
+
+  /* STORY / HISTORY */
+  .story-text {
+    line-height: 1.9;
+    color: var(--text);
+    font-size: 0.95rem;
+  }
+
+  .story-text p { margin-bottom: 1rem; }
+
+  .story-text strong { color: var(--accent1); }
+
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(232,197,71,0.08), rgba(71,184,232,0.05));
+    border-left: 3px solid var(--accent1);
+    padding: 1rem 1.5rem;
+    border-radius: 0 8px 8px 0;
+    margin: 1rem 0;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.8;
+  }
+
+  /* FORMULA */
+  .formula-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem 1.5rem;
+    margin: 1rem 0;
+    text-align: center;
+  }
+
+  .formula {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem;
+    color: var(--accent2);
+    letter-spacing: 0.05em;
+  }
+
+  .formula-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+  }
+
+  /* FORM ELEMENTS */
+  label {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  input[type="text"], input[type="number"], textarea, select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.7rem 1rem;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  input:focus, textarea:focus {
+    border-color: var(--accent1);
+    box-shadow: 0 0 0 3px rgba(232,197,71,0.1);
+  }
+
+  input.error { border-color: var(--error); box-shadow: 0 0 0 3px rgba(232,71,71,0.1); }
+  input.valid { border-color: var(--success); box-shadow: 0 0 0 3px rgba(71,232,160,0.1); }
+
+  textarea { resize: vertical; min-height: 80px; }
+
+  .input-group { margin-bottom: 1.2rem; }
+
+  .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  .input-hint {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 0.35rem;
+  }
+
+  .input-hint.error-hint { color: var(--error); }
+  .input-hint.success-hint { color: var(--success); }
+
+  /* BUTTONS */
+  .btn {
+    padding: 0.65rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .btn-primary {
+    background: var(--accent1);
+    color: #0a0a0f;
+    font-weight: 700;
+  }
+
+  .btn-primary:hover { background: #f0d050; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(232,197,71,0.3); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--accent2);
+    border: 1px solid var(--accent2);
+  }
+
+  .btn-secondary:hover { background: rgba(71,184,232,0.1); }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--accent3);
+    border: 1px solid var(--accent3);
+  }
+
+  .btn-danger:hover { background: rgba(232,71,160,0.1); }
+
+  .btn-group { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+  /* OUTPUT */
+  .output-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem;
+    min-height: 60px;
+    position: relative;
+  }
+
+  .output-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+  }
+
+  .output-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--accent1);
+    word-break: break-all;
+    line-height: 1.7;
+  }
+
+  .output-empty { color: var(--border); font-style: italic; font-size: 0.8rem; }
+
+  /* BRUTE FORCE TABLE */
+  .brute-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .brute-table th {
+    background: var(--surface);
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .brute-table td {
+    padding: 0.5rem 0.8rem;
+    border-bottom: 1px solid rgba(42,42,58,0.5);
+    color: var(--text);
+  }
+
+  .brute-table tr:hover td { background: rgba(232,197,71,0.04); }
+
+  .shift-num { color: var(--accent2); }
+  .shift-text { color: var(--accent1); }
+
+  /* STEPS */
+  .steps { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
+
+  .step {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(232,197,71,0.15);
+    border: 1px solid var(--accent1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent1);
+    flex-shrink: 0;
+  }
+
+  .step-content { flex: 1; }
+
+  .step-content h4 {
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+    color: var(--text);
+  }
+
+  .step-content p {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* RSA KEY DISPLAY */
+  .key-display {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .key-box {
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid var(--border);
+  }
+
+  .key-box.public { border-color: rgba(71,184,232,0.4); }
+  .key-box.private { border-color: rgba(232,71,160,0.4); }
+
+  .key-box-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+
+  .key-box.public .key-box-label { color: var(--accent2); }
+  .key-box.private .key-box-label { color: var(--accent3); }
+
+  .key-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .key-box.public .key-value { color: var(--accent2); }
+  .key-box.private .key-value { color: var(--accent3); }
+
+  .key-sub {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+  }
+
+  /* PROCESS LOG */
+  .process-log {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    line-height: 2;
+    max-height: 250px;
+    overflow-y: auto;
+  }
+
+  .log-line { display: flex; gap: 0.75rem; }
+  .log-label { color: var(--muted); flex-shrink: 0; }
+  .log-value { color: var(--accent1); }
+  .log-value.blue { color: var(--accent2); }
+  .log-value.pink { color: var(--accent3); }
+  .log-value.green { color: var(--success); }
+
+  /* ALPHABET TABLE */
+  .alpha-table {
+    display: grid;
+    grid-template-columns: repeat(13, 1fr);
+    gap: 3px;
+    margin: 1rem 0;
+  }
+
+  .alpha-cell {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    text-align: center;
+    padding: 4px 2px;
+  }
+
+  .alpha-cell .char {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent1);
+  }
+
+  .alpha-cell .num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+  }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+    margin: 2rem 0;
+  }
+
+  /* TAG */
+  .tag {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: rgba(232,197,71,0.12);
+    color: var(--accent1);
+    border: 1px solid rgba(232,197,71,0.3);
+    margin-bottom: 0.5rem;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .input-row { grid-template-columns: 1fr; }
+    .key-display { grid-template-columns: 1fr; }
+    .section-header { flex-direction: column; gap: 0.5rem; }
+    .section-number { font-size: 3rem; }
+    nav { overflow-x: auto; }
+    .alpha-table { grid-template-columns: repeat(6, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">⟨ Crypto ∕ Math ⟩</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showSection('shift')">Shift Cipher</button>
+    <button class="nav-tab" onclick="showSection('rsa')">RSA</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">Mathematics of Cryptography</div>
+  <h1 class="hero-title">The Art of<br>Secret Writing</h1>
+  <p class="hero-sub">From ancient Caesar ciphers to modern RSA — explore the math behind secure communication.</p>
+</div>
+
+<!-- ============================
+     SHIFT CIPHER SECTION
+============================= -->
+<div class="section active" id="shift">
+
+  <div class="section-header">
+    <div class="section-number">01</div>
+    <div class="section-info">
+      <h2>Shift / Caesar Cipher</h2>
+      <p>One of the oldest and simplest encryption techniques, used by Julius Caesar himself to protect military communications over 2,000 years ago.</p>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="card">
+    <div class="card-title">History & Origins</div>
+    <div class="story-text">
+      <p>The Caesar cipher is named after <strong>Julius Caesar</strong> (100–44 BC), who reportedly used it with a shift of 3 to communicate with his generals. The historian Suetonius described this cipher in his work <em>The Life of Julius Caesar</em>, making it one of the earliest documented uses of encryption in history.</p>
+      <p>The idea is deceptively simple: each letter in a message is shifted a fixed number of positions in the alphabet. With a shift of 3, <strong>A → D, B → E, C → F</strong>, and so on. The receiver, knowing the shift value (the "key"), can reverse the process to decrypt.</p>
+      <p>While trivially broken today — with only 25 possible shifts — this cipher laid the groundwork for centuries of cryptographic innovation. The concept of <strong>substitution</strong> became central to all future cipher systems, from the Vigenère cipher of the 16th century to the Enigma machine of World War II.</p>
+      <div class="highlight-box">
+        ⟶ "HELLO" with shift 3 = "KHOOR"<br>
+        ⟶ "KHOOR" with shift -3 = "HELLO"
+      </div>
+    </div>
+  </div>
+
+  <!-- FORMULA -->
+  <div class="card">
+    <div class="card-title">Mathematical Formula</div>
+    <div class="story-text">
+      <p>The cipher operates on the alphabet mapped to integers: <strong>A=0, B=1, C=2, … Z=25</strong>. Modular arithmetic ensures we wrap around the alphabet.</p>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula">Encryption: E(x) = (x + k) mod 26</div>
+      <div class="formula-label">where x = letter position (0–25), k = shift key</div>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula">Decryption: D(x) = (x − k + 26) mod 26</div>
+      <div class="formula-label">+26 ensures the result is never negative</div>
+    </div>
+
+    <div style="margin-top:1rem">
+      <div class="output-label">Alphabet Reference (A=0 ... Z=25)</div>
+      <div class="alpha-table" id="alphaTable"></div>
+    </div>
+
+    <div style="margin-top:1rem">
+      <div class="story-text">
+        <p><strong>Example:</strong> Encrypt the letter 'H' with shift 5.<br>
+        H = position 7 → (7 + 5) mod 26 = 12 → <strong>'M'</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENCRYPT -->
+  <div class="card">
+    <div class="card-title">Encrypt</div>
+    <div class="input-group">
+      <label>Plaintext Message</label>
+      <textarea id="encryptInput" placeholder="Enter your message to encrypt..."></textarea>
+    </div>
+    <div class="input-group">
+      <label>Shift Key (1–25)</label>
+      <input type="number" id="encryptShift" value="3" min="1" max="25">
+    </div>
+    <div class="btn-group" style="margin-bottom:1rem">
+      <button class="btn btn-primary" onclick="encryptShift()">Encrypt →</button>
+      <button class="btn btn-secondary" onclick="clearShift('encrypt')">Clear</button>
+    </div>
+    <div class="output-box">
+      <div class="output-label">Ciphertext</div>
+      <div class="output-value" id="encryptOutput"><span class="output-empty">Result will appear here...</span></div>
+    </div>
+    <div id="encryptProcess" style="display:none; margin-top:1rem">
+      <div class="output-label">Step-by-step Process</div>
+      <div class="process-log" id="encryptLog"></div>
+    </div>
+  </div>
+
+  <!-- DECRYPT -->
+  <div class="card">
+    <div class="card-title">Decrypt</div>
+    <div class="input-group">
+      <label>Ciphertext Message</label>
+      <textarea id="decryptInput" placeholder="Enter your ciphertext to decrypt..."></textarea>
+    </div>
+    <div class="input-group">
+      <label>Shift Key (1–25)</label>
+      <input type="number" id="decryptShift" value="3" min="1" max="25">
+    </div>
+    <div class="btn-group" style="margin-bottom:1rem">
+      <button class="btn btn-primary" onclick="decryptShift()">Decrypt →</button>
+      <button class="btn btn-secondary" onclick="clearShift('decrypt')">Clear</button>
+    </div>
+    <div class="output-box">
+      <div class="output-label">Plaintext</div>
+      <div class="output-value" id="decryptOutput"><span class="output-empty">Result will appear here...</span></div>
+    </div>
+    <div id="decryptProcess" style="display:none; margin-top:1rem">
+      <div class="output-label">Step-by-step Process</div>
+      <div class="process-log" id="decryptLog"></div>
+    </div>
+  </div>
+
+  <!-- BRUTE FORCE -->
+  <div class="card">
+    <div class="card-title">Brute Force Attack</div>
+    <div class="story-text" style="margin-bottom:1rem">
+      <p>Since there are only 25 possible shifts, an attacker can try all of them simultaneously. This is why the Caesar cipher provides <strong>no real security</strong> — it can be broken instantly.</p>
+    </div>
+    <div class="input-group">
+      <label>Ciphertext to Attack</label>
+      <textarea id="bruteInput" placeholder="Enter ciphertext to crack all 25 possible shifts..."></textarea>
+    </div>
+    <div class="btn-group" style="margin-bottom:1rem">
+      <button class="btn btn-danger" onclick="bruteForce()">⚡ Brute Force Attack</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('bruteInput').value=''; document.getElementById('bruteResult').style.display='none'">Clear</button>
+    </div>
+    <div id="bruteResult" style="display:none">
+      <div class="output-label">All 25 Possible Plaintexts</div>
+      <div style="overflow-x:auto">
+        <table class="brute-table">
+          <thead><tr><th>Shift</th><th>Formula</th><th>Decrypted Text</th></tr></thead>
+          <tbody id="bruteTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================
+     RSA SECTION
+============================= -->
+<div class="section" id="rsa">
+
+  <div class="section-header">
+    <div class="section-number">02</div>
+    <div class="section-info">
+      <h2>RSA Encryption</h2>
+      <p>The most widely used public-key cryptosystem, invented in 1977, securing everything from HTTPS websites to email encryption today.</p>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="card">
+    <div class="card-title">History & Origins</div>
+    <div class="story-text">
+      <p>RSA was invented in <strong>1977</strong> by <strong>Ron Rivest, Adi Shamir, and Leonard Adleman</strong> at MIT — its name is an acronym of their surnames. The algorithm was publicly described in a 1978 paper and became the foundation of modern internet security.</p>
+      <p>Before RSA, all encryption required both parties to share a secret key in advance (like the Caesar cipher's shift value). RSA solved the "key distribution problem" with a revolutionary idea: <strong>asymmetric cryptography</strong>. You have two keys — a <strong>public key</strong> anyone can know, and a <strong>private key</strong> only you hold. Anyone can encrypt a message with your public key, but only your private key can decrypt it.</p>
+      <p>The security of RSA rests on a fundamental problem in mathematics: while it is easy to multiply two large prime numbers together, it is computationally infeasible to factor the product back into its primes. A number with <strong>2,048 bits</strong> would take longer than the age of the universe to factor with classical computers.</p>
+      <div class="highlight-box">
+        Mathematically equivalent conjecture:<br>
+        ⟶ Easy: 61 × 53 = 3,233<br>
+        ⟶ Hard: Factor 3,233 → ? × ?
+      </div>
+    </div>
+  </div>
+
+  <!-- PROCESS -->
+  <div class="card">
+    <div class="card-title">Mathematical Process</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>Choose two prime numbers p and q</h4>
+          <p>Select two large, distinct prime numbers. Their secrecy is paramount — these are never shared.</p>
+          <div class="formula-block" style="text-align:left; margin-top:0.5rem">
+            <div class="formula" style="font-size:0.85rem">e.g., p = 61, q = 53</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>Compute n = p × q</h4>
+          <p>This is the <strong>modulus</strong>, shared publicly. Factoring n back into p and q is the hard problem.</p>
+          <div class="formula-block" style="text-align:left; margin-top:0.5rem">
+            <div class="formula" style="font-size:0.85rem">n = 61 × 53 = 3,233</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Compute Euler's Totient φ(n) = (p−1)(q−1)</h4>
+          <p>φ(n) counts integers from 1 to n that are coprime with n. This is kept secret.</p>
+          <div class="formula-block" style="text-align:left; margin-top:0.5rem">
+            <div class="formula" style="font-size:0.85rem">φ(3233) = 60 × 52 = 3,120</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>Choose public exponent e</h4>
+          <p>Pick e such that 1 &lt; e &lt; φ(n) and gcd(e, φ(n)) = 1. Common choice: <strong>e = 65537</strong>.</p>
+          <div class="formula-block" style="text-align:left; margin-top:0.5rem">
+            <div class="formula" style="font-size:0.85rem">gcd(17, 3120) = 1 ✓ → e = 17</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h4>Compute private exponent d</h4>
+          <p>Find d such that <strong>e × d ≡ 1 (mod φ(n))</strong> using the Extended Euclidean Algorithm. d is your private key.</p>
+          <div class="formula-block" style="text-align:left; margin-top:0.5rem">
+            <div class="formula" style="font-size:0.85rem">17 × d ≡ 1 (mod 3120) → d = 2753</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <h4>Encrypt & Decrypt with Modular Exponentiation</h4>
+          <div class="formula-block" style="text-align:left; margin-top:0.5rem">
+            <div class="formula" style="font-size:0.85rem">Encrypt: C = Mᵉ mod n</div>
+            <div class="formula-label" style="text-align:left">C = ciphertext, M = message number</div>
+            <div class="formula" style="font-size:0.85rem; margin-top:0.5rem">Decrypt: M = Cᵈ mod n</div>
+            <div class="formula-label" style="text-align:left">Only the holder of d can decrypt</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY GENERATION -->
+  <div class="card">
+    <div class="card-title">Step 1 — Generate Keys</div>
+    <div class="story-text" style="margin-bottom:1rem; font-size:0.85rem">
+      <p>Enter two prime numbers. The tool validates primality and computes your RSA key pair.</p>
+    </div>
+    <div class="input-row">
+      <div class="input-group">
+        <label>Prime number p</label>
+        <input type="number" id="rsaP" placeholder="e.g. 61" min="2" oninput="validatePrime('rsaP', 'rsaPHint')">
+        <div class="input-hint" id="rsaPHint">Enter a prime number</div>
+      </div>
+      <div class="input-group">
+        <label>Prime number q</label>
+        <input type="number" id="rsaQ" placeholder="e.g. 53" min="2" oninput="validatePrime('rsaQ', 'rsaQHint')">
+        <div class="input-hint" id="rsaQHint">Enter a prime number (different from p)</div>
+      </div>
+    </div>
+    <div class="btn-group" style="margin-bottom:1rem">
+      <button class="btn btn-primary" onclick="generateRSAKeys()">Generate Keys</button>
+      <button class="btn btn-secondary" onclick="fillExample()">Use Example (p=61, q=53)</button>
+      <button class="btn btn-secondary" onclick="clearRSA()">Clear</button>
+    </div>
+
+    <div id="keyResult" style="display:none">
+      <div class="output-label">Generated Key Pair</div>
+      <div class="key-display">
+        <div class="key-box public">
+          <div class="key-box-label">🔓 Public Key</div>
+          <div class="key-value" id="pubKey">—</div>
+          <div class="key-sub">(n, e) — share freely</div>
+        </div>
+        <div class="key-box private">
+          <div class="key-box-label">🔐 Private Key</div>
+          <div class="key-value" id="privKey">—</div>
+          <div class="key-sub">(n, d) — keep secret!</div>
+        </div>
+      </div>
+      <div style="margin-top:1rem">
+        <div class="output-label">Computation Steps</div>
+        <div class="process-log" id="keyLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RSA ENCRYPT -->
+  <div class="card">
+    <div class="card-title">Step 2 — Encrypt Message</div>
+    <div class="story-text" style="margin-bottom:1rem; font-size:0.85rem">
+      <p>Each letter is converted to its ASCII code (A=65...Z=90, a=97...z=122), then encrypted as: <strong>C = Mᵉ mod n</strong>. Generate keys first!</p>
+    </div>
+    <div class="input-group">
+      <label>Plaintext Message</label>
+      <textarea id="rsaPlaintext" placeholder="Enter text to encrypt (letters only for best results)..."></textarea>
+    </div>
+    <div class="btn-group" style="margin-bottom:1rem">
+      <button class="btn btn-primary" onclick="rsaEncrypt()">Encrypt with Public Key →</button>
+    </div>
+    <div class="output-box">
+      <div class="output-label">Ciphertext (space-separated numbers)</div>
+      <div class="output-value" id="rsaCiphertext"><span class="output-empty">Generate keys first, then encrypt...</span></div>
+    </div>
+    <div id="rsaEncryptProcess" style="display:none; margin-top:1rem">
+      <div class="output-label">Encryption Steps</div>
+      <div class="process-log" id="rsaEncryptLog"></div>
+    </div>
+  </div>
+
+  <!-- RSA DECRYPT -->
+  <div class="card">
+    <div class="card-title">Step 3 — Decrypt Message</div>
+    <div class="story-text" style="margin-bottom:1rem; font-size:0.85rem">
+      <p>Using the private key: <strong>M = Cᵈ mod n</strong>. Only the holder of d can recover the original message.</p>
+    </div>
+    <div class="input-group">
+      <label>Ciphertext (space-separated numbers)</label>
+      <textarea id="rsaCiphertextInput" placeholder="Paste encrypted numbers here... or use the Auto-fill button below"></textarea>
+    </div>
+    <div class="btn-group" style="margin-bottom:1rem">
+      <button class="btn btn-primary" onclick="rsaDecrypt()">Decrypt with Private Key →</button>
+      <button class="btn btn-secondary" onclick="autoFillCipher()">Auto-fill from Encryption</button>
+    </div>
+    <div class="output-box">
+      <div class="output-label">Decrypted Plaintext</div>
+      <div class="output-value" id="rsaDecrypted"><span class="output-empty">Decrypt to see original message...</span></div>
+    </div>
+    <div id="rsaDecryptProcess" style="display:none; margin-top:1rem">
+      <div class="output-label">Decryption Steps</div>
+      <div class="process-log" id="rsaDecryptLog"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ==================== SECTION TOGGLE ====================
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ==================== ALPHABET TABLE ====================
+(function buildAlphaTable() {
+  const t = document.getElementById('alphaTable');
+  for (let i = 0; i < 26; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'alpha-cell';
+    cell.innerHTML = `<div class="char">${String.fromCharCode(65+i)}</div><div class="num">${i}</div>`;
+    t.appendChild(cell);
+  }
+})();
+
+// ==================== SHIFT CIPHER ====================
+function shiftChar(char, shift, encrypt) {
+  const upper = char >= 'A' && char <= 'Z';
+  const lower = char >= 'a' && char <= 'z';
+  if (!upper && !lower) return { out: char, skipped: true };
+  const base = upper ? 65 : 97;
+  const pos = char.charCodeAt(0) - base;
+  const s = encrypt ? shift : (26 - shift);
+  const newPos = (pos + s) % 26;
+  return { out: String.fromCharCode(newPos + base), skipped: false, pos, newPos };
+}
+
+function encryptShift() {
+  const text = document.getElementById('encryptInput').value;
+  const shift = parseInt(document.getElementById('encryptShift').value) || 3;
+  if (!text.trim()) return;
+  let result = '', log = '';
+  for (const ch of text) {
+    const { out, skipped, pos, newPos } = shiftChar(ch, shift, true);
+    result += out;
+    if (!skipped)
+      log += `<div class="log-line"><span class="log-label">'${ch}'(${pos})</span><span class="log-value blue"> + ${shift} mod 26 = ${newPos} → </span><span class="log-value">'${out}'</span></div>`;
+  }
+  document.getElementById('encryptOutput').textContent = result;
+  document.getElementById('encryptLog').innerHTML = log;
+  document.getElementById('encryptProcess').style.display = 'block';
+}
+
+function decryptShift() {
+  const text = document.getElementById('decryptInput').value;
+  const shift = parseInt(document.getElementById('decryptShift').value) || 3;
+  if (!text.trim()) return;
+  let result = '', log = '';
+  for (const ch of text) {
+    const { out, skipped, pos, newPos } = shiftChar(ch, shift, false);
+    result += out;
+    if (!skipped)
+      log += `<div class="log-line"><span class="log-label">'${ch}'(${pos})</span><span class="log-value blue"> − ${shift} + 26 mod 26 = ${newPos} → </span><span class="log-value">'${out}'</span></div>`;
+  }
+  document.getElementById('decryptOutput').textContent = result;
+  document.getElementById('decryptLog').innerHTML = log;
+  document.getElementById('decryptProcess').style.display = 'block';
+}
+
+function clearShift(mode) {
+  document.getElementById(mode + 'Input').value = '';
+  document.getElementById(mode + 'Output').innerHTML = '<span class="output-empty">Result will appear here...</span>';
+  document.getElementById(mode + 'Process').style.display = 'none';
+}
+
+function bruteForce() {
+  const text = document.getElementById('bruteInput').value;
+  if (!text.trim()) return;
+  const tbody = document.getElementById('bruteTable');
+  tbody.innerHTML = '';
+  for (let s = 1; s <= 25; s++) {
+    let dec = '';
+    for (const ch of text) {
+      dec += shiftChar(ch, s, false).out;
+    }
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="shift-num">${s}</td><td style="color:var(--muted);font-size:0.7rem">(x − ${s} + 26) mod 26</td><td class="shift-text">${dec}</td>`;
+    tbody.appendChild(tr);
+  }
+  document.getElementById('bruteResult').style.display = 'block';
+}
+
+// ==================== RSA ====================
+let rsaState = { n: null, e: null, d: null, phi: null };
+
+function isPrime(n) {
+  if (n < 2) return false;
+  if (n === 2) return true;
+  if (n % 2 === 0) return false;
+  for (let i = 3; i <= Math.sqrt(n); i += 2)
+    if (n % i === 0) return false;
+  return true;
+}
+
+function validatePrime(inputId, hintId) {
+  const inp = document.getElementById(inputId);
+  const hint = document.getElementById(hintId);
+  const val = parseInt(inp.value);
+  if (!inp.value) {
+    inp.className = '';
+    hint.className = 'input-hint';
+    hint.textContent = 'Enter a prime number';
+    return false;
+  }
+  if (isPrime(val)) {
+    inp.className = 'valid';
+    hint.className = 'input-hint success-hint';
+    hint.textContent = `✓ ${val} is prime`;
+    return true;
+  } else {
+    inp.className = 'error';
+    hint.className = 'input-hint error-hint';
+    hint.textContent = `✗ ${val} is NOT prime — try another number`;
+    return false;
+  }
+}
+
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+function modInverse(e, phi) {
+  // Extended Euclidean
+  let [old_r, r] = [e, phi];
+  let [old_s, s] = [1, 0];
+  while (r !== 0) {
+    const q = Math.floor(old_r / r);
+    [old_r, r] = [r, old_r - q * r];
+    [old_s, s] = [s, old_s - q * s];
+  }
+  return ((old_s % phi) + phi) % phi;
+}
+
+function modPow(base, exp, mod) {
+  // fast modular exponentiation (BigInt for safety)
+  base = BigInt(base); exp = BigInt(exp); mod = BigInt(mod);
+  let result = 1n;
+  base = base % mod;
+  while (exp > 0n) {
+    if (exp % 2n === 1n) result = (result * base) % mod;
+    exp = exp / 2n;
+    base = (base * base) % mod;
+  }
+  return Number(result);
+}
+
+function findE(phi) {
+  // Common: try 65537, then smaller primes
+  const candidates = [65537, 17, 13, 11, 7, 5, 3];
+  for (const c of candidates)
+    if (c < phi && gcd(c, phi) === 1) return c;
+  // fallback: find first valid e
+  for (let e = 2; e < phi; e++)
+    if (gcd(e, phi) === 1) return e;
+  return -1;
+}
+
+function generateRSAKeys() {
+  const pValid = validatePrime('rsaP', 'rsaPHint');
+  const qValid = validatePrime('rsaQ', 'rsaQHint');
+  if (!pValid || !qValid) return;
+
+  const p = parseInt(document.getElementById('rsaP').value);
+  const q = parseInt(document.getElementById('rsaQ').value);
+
+  if (p === q) {
+    document.getElementById('rsaQHint').textContent = '✗ p and q must be different';
+    document.getElementById('rsaQ').className = 'error';
+    return;
+  }
+
+  const n = p * q;
+  const phi = (p - 1) * (q - 1);
+  const e = findE(phi);
+  const d = modInverse(e, phi);
+
+  rsaState = { n, e, d, phi };
+
+  document.getElementById('pubKey').textContent = `(n=${n}, e=${e})`;
+  document.getElementById('privKey').textContent = `(n=${n}, d=${d})`;
+
+  const log = `
+    <div class="log-line"><span class="log-label">p =</span><span class="log-value">${p}</span></div>
+    <div class="log-line"><span class="log-label">q =</span><span class="log-value">${q}</span></div>
+    <div class="log-line"><span class="log-label">n = p × q =</span><span class="log-value blue">${p} × ${q} = ${n}</span></div>
+    <div class="log-line"><span class="log-label">φ(n) = (p−1)(q−1) =</span><span class="log-value blue">${p-1} × ${q-1} = ${phi}</span></div>
+    <div class="log-line"><span class="log-label">Choose e: gcd(e, φ(n))=1 →</span><span class="log-value">${e}</span></div>
+    <div class="log-line"><span class="log-label">d = e⁻¹ mod φ(n) →</span><span class="log-value pink">${d}</span></div>
+    <div class="log-line"><span class="log-label">Verify e×d mod φ(n) =</span><span class="log-value green">${(e * d) % phi} ✓ (should be 1)</span></div>
+    <div class="log-line"><span class="log-label">Public Key:</span><span class="log-value blue">(n=${n}, e=${e})</span></div>
+    <div class="log-line"><span class="log-label">Private Key:</span><span class="log-value pink">(n=${n}, d=${d})</span></div>
+  `;
+  document.getElementById('keyLog').innerHTML = log;
+  document.getElementById('keyResult').style.display = 'block';
+}
+
+function rsaEncrypt() {
+  if (!rsaState.n) { alert('Please generate keys first!'); return; }
+  const text = document.getElementById('rsaPlaintext').value;
+  if (!text.trim()) return;
+
+  const { n, e } = rsaState;
+  let cipherNums = [], log = '';
+
+  for (const ch of text) {
+    const m = ch.charCodeAt(0);
+    if (m >= n) {
+      log += `<div class="log-line"><span class="log-label">'${ch}'</span><span class="log-value" style="color:var(--error)"> ASCII ${m} ≥ n=${n}, skipped</span></div>`;
+      cipherNums.push(m); // pass through
+      continue;
+    }
+    const c = modPow(m, e, n);
+    cipherNums.push(c);
+    log += `<div class="log-line"><span class="log-label">'${ch}'</span><span class="log-value blue"> ASCII=${m} → ${m}^${e} mod ${n} = </span><span class="log-value">${c}</span></div>`;
+  }
+
+  const cipher = cipherNums.join(' ');
+  document.getElementById('rsaCiphertext').textContent = cipher;
+  document.getElementById('rsaEncryptLog').innerHTML = log;
+  document.getElementById('rsaEncryptProcess').style.display = 'block';
+}
+
+function autoFillCipher() {
+  const ct = document.getElementById('rsaCiphertext').textContent;
+  if (ct && ct !== 'Generate keys first, then encrypt...') {
+    document.getElementById('rsaCiphertextInput').value = ct;
+  } else {
+    alert('Please encrypt a message first!');
+  }
+}
+
+function rsaDecrypt() {
+  if (!rsaState.n) { alert('Please generate keys first!'); return; }
+  const input = document.getElementById('rsaCiphertextInput').value.trim();
+  if (!input) return;
+
+  const { n, d } = rsaState;
+  const nums = input.split(/\s+/).map(Number);
+  let plain = '', log = '';
+
+  for (const c of nums) {
+    const m = modPow(c, d, n);
+    const ch = String.fromCharCode(m);
+    plain += ch;
+    log += `<div class="log-line"><span class="log-label">C=${c}</span><span class="log-value blue"> → ${c}^${d} mod ${n} = ${m} → </span><span class="log-value">'${ch}'</span></div>`;
+  }
+
+  document.getElementById('rsaDecrypted').textContent = plain;
+  document.getElementById('rsaDecryptLog').innerHTML = log;
+  document.getElementById('rsaDecryptProcess').style.display = 'block';
+}
+
+function fillExample() {
+  document.getElementById('rsaP').value = 61;
+  document.getElementById('rsaQ').value = 53;
+  validatePrime('rsaP', 'rsaPHint');
+  validatePrime('rsaQ', 'rsaQHint');
+}
+
+function clearRSA() {
+  ['rsaP','rsaQ'].forEach(id => { document.getElementById(id).value = ''; document.getElementById(id).className = ''; });
+  document.getElementById('rsaPHint').textContent = 'Enter a prime number';
+  document.getElementById('rsaPHint').className = 'input-hint';
+  document.getElementById('rsaQHint').textContent = 'Enter a prime number (different from p)';
+  document.getElementById('rsaQHint').className = 'input-hint';
+  document.getElementById('keyResult').style.display = 'none';
+  rsaState = { n: null, e: null, d: null, phi: null };
+}
+</script>
+</body>
+</html>
